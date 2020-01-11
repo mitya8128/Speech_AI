@@ -23,6 +23,8 @@ import logging
 # Because sometimes sr.recognize_google() fails due to field 'confidence' don't exists in json
 # So we will get all statements in json style and beautify them
 class Statement:
+
+
     def __init__(self, dict):
         self.confidence = dict['confidence']
         self.text = dict['transcript'].lower()
@@ -38,6 +40,8 @@ class Statement:
 
 
 class Speech_AI:
+
+
     def __init__(self, google_treshold = 0.5, chatterbot_treshold = 0.45):
         self._recognizer = sr.Recognizer()
         self._microphone = sr.Microphone()
@@ -73,6 +77,8 @@ class Speech_AI:
 
 
     def work(self):
+
+
         print('Минутку тишины, пожалуйста...')
         with self._microphone as source:
             self._recognizer.adjust_for_ambient_noise(source)
@@ -100,6 +106,8 @@ class Speech_AI:
     # * on success: list of Statement objects
     # * on error: if error arises, return empty list
     def recognize(self, audio):
+
+
         statements = []
         try:
             json = self._recognizer.recognize_google(audio, language="ru_RU", show_all=True)
@@ -112,6 +120,8 @@ class Speech_AI:
 
     # json to statements (check class in beginning of this script)
     def json_to_statements(self, json):
+
+
         statements = []
         if len(json) is not 0:
             for dict in json['alternative']:
@@ -125,6 +135,8 @@ class Speech_AI:
     # * on success: Statement object
     # * on error: None
     def choose_best_statement(self, statements):
+
+
         if statements:
             return max(statements, key=lambda s: s.confidence)
         else:
@@ -132,12 +144,16 @@ class Speech_AI:
 
     # check one word from words in string
     def check_in_string(self, string, words):
+
+
         if any(word in string for word in words):
             return True
         return False
 
     # A lot of cool possibilities can be impemented here (IoT, CV, ...)
     def process_statement(self, best_statement, statements):
+
+
         if best_statement is None or best_statement.confidence < self.google_treshold:
             answer = "Простите, вас плохо слышно"
         else:
@@ -166,6 +182,8 @@ class Speech_AI:
 
     # Get synthesized mp3 and play it with pygame
     def say(self, phrase):
+
+
         # Synthesize answer
         # todo check exceptons there
         print("[GoogleTTS] Начало запроса")
@@ -183,16 +201,22 @@ class Speech_AI:
             time.sleep(0.1)
 
     def make_answer(self, statement):
+
+
         return self.bot.get_response(statement)
 
     # train chatterbot with our corpus (all files if ./corpus folder)
     def train(self):
+
+
         self.bot.set_trainer(ChatterBotCorpusTrainer)
         self.bot.train("corpus")
         print("Обучение завершено")
 
     # keyboard exception handler
     def shutdown(self, export=False):
+
+
         if export:
             self.bot.trainer.export_for_training('corpus/last_session_corpus.json')
             print("База данных экспортирована в корпус last_session_corpus.json")
@@ -201,15 +225,21 @@ class Speech_AI:
         print("Завершение работы")
 
     def clean_up(self):
+
+
         os.remove(self._mp3_name)
 
     # if we have db already we don't need to train bot again
     def is_db_exists(self):
+
+
         db_path = os.getcwd() + '/database.json'
         return os.path.isfile(db_path)
 
 
 def main():
+
+
     ai = Speech_AI()
     try:
         ai.work()
